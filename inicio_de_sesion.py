@@ -1,3 +1,22 @@
+import sqlite3
+
+def inicializar_base_de_datos(): #permite crear la base de datos 
+    conexion = sqlite3.connect("control_acceso.db")
+    cursor = conexion.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS usuario_acceso (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   nombre TEXT NOT NULL,
+                   edad INTEGER NOT NULL,
+                   acceso_consedido INTERGER NOT NULL
+                   )
+    """)
+    conexion.commit()
+    conexion.close()
+    print ("base de datos e infraestructura lista")
+
+
+
 def inicio_usuario(): #Esta funcion permite que ingrese el nombre, y la edad de los usuarios
     #declaramos las funciones fuera del bucle while para poder acceder a todas las varibales
     print("bienvenido al programa")
@@ -30,17 +49,23 @@ def inicio_usuario(): #Esta funcion permite que ingrese el nombre, y la edad de 
         if counter == 3:
             #en caso de intentos maximos permitidos permite enviar el mensaje el mensaje que los intentos se han terminado 
             print("Intentos maximos permitidos")
-    return access, name, age, counter
+    return name, age, access, counter
 
-"""
-Las siguientes variables permiten corroborar que se esten ejecutando de 
-manera correcta las varibales   
-"""
-acceso_permitido, nombre_usuario, edad, numero_intentos = inicio_usuario()
+def registrar_usuarios (name, age, access): #permite agragar datos a las tablas
+    conexion =sqlite3.connect("control_acceso.db")
+    cursor = conexion.cursor()
+    acceso_entero = 1 if access == True else 0
+    cursor.execute("""
+        INSERT INTO usuario_acceso (nombre, edad, acceso_consedido)
+        VALUES (?, ?, ?) 
+    """, (name, age, acceso_entero)
+                   )
+    conexion.commit()
+    conexion.close()
+    print("resgistro guardado")
 
-print (f"acceso: {acceso_permitido}")
-print (f"nombre del usuario: {nombre_usuario}")
-print(f"edad del usuaio: {edad}")
-print(f"intento realizados: {numero_intentos}")
 
-
+if __name__ == "__main__":
+    inicializar_base_de_datos()
+    name, age, access, counter = inicio_usuario()
+    registrar_usuarios(name, age, access)
